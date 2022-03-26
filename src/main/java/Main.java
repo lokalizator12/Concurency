@@ -8,11 +8,9 @@ public class Main {
 
     public static void main(String[] args) {
 
-
-       withoutConcurrency();
-
-       with();
-
+        startTimer();
+        withoutConcurrency();
+        with();
     }
 
     private static void withoutConcurrency() {
@@ -46,12 +44,12 @@ public class Main {
             public void run() {
                 long before = System.currentTimeMillis();
                 for (int i = 0; i < half; i++) {
-                    float f = (float) (i + half) ;
+                    float f = (float) (i + half);
                     list2[i] = (float) (list2[i] * Math.sin(0.2f + f / 5) * Math.cos(0.4f + f / 2));
                 }
 
                 long after = System.currentTimeMillis();
-                System.out.println("arrayCopy1 :" + (after-before));
+                System.out.println("arrayCopy1 :" + (after - before));
             }
         });
 
@@ -65,7 +63,7 @@ public class Main {
                 }
 
                 long after = System.currentTimeMillis();
-                System.out.println("arrayCopy2 :" + (after-before));
+                System.out.println("arrayCopy2 :" + (after - before));
             }
         });
 
@@ -80,9 +78,24 @@ public class Main {
         System.arraycopy(list2, 0, list1, 0, list2.length);
         System.arraycopy(list3, 0, list1, half, list3.length);
         long after = System.currentTimeMillis();
-        System.out.println("time with :"+ (after - before1));
+        System.out.println("time with :" + (after - before1));
     }
 
-    ;
+    public static void startTimer() {
+
+        Thread timer = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int second4 = 0;
+                while (true){
+                    System.out.println(second4++);
+                }
+
+            }
+        });
+        timer.start();
+        timer.setDaemon(true);
+    }
 }
+
 
