@@ -8,9 +8,58 @@ public class Main {
 
     public static void main(String[] args) {
 
-        startTimer();
-        withoutConcurrency();
-        with();
+       // startTimer();
+       // withoutConcurrency();
+       // with();
+
+
+        giveMeMoney();
+
+
+    }
+
+    private static void giveMeMoney(){
+        Bankomat profile1 = new Bankomat(1000);
+
+        Thread thread4 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                profile1.ifHaveMoney("kol",500);
+            }
+        });
+
+        Thread thread5 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+            profile1.ifHaveMoney("uit",300);
+            }
+        });
+
+        Thread thread6 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                profile1.ifHaveMoney("uidst",600);
+            }
+        });
+        thread4.start();
+
+        try {
+            thread4.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        try {
+            thread4.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        thread5.start();
+        thread6.start();
+
+
     }
 
     private static void withoutConcurrency() {
@@ -96,6 +145,10 @@ public class Main {
         timer.start();
         timer.setDaemon(true);
     }
+
+
+
+
 }
 
 
