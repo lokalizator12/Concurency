@@ -6,136 +6,57 @@ import java.util.concurrent.*;
 
 public class Main {
 
-    public static void SinglePool(){
-        long before = System.currentTimeMillis();
-        ExecutorService executorServiceSinglePool = Executors.newSingleThreadExecutor();
-        CountDownLatch countDownLatch1 = new CountDownLatch(3);
-
-        executorServiceSinglePool.execute(new Runnable() {
-            @Override
-            public void run() {
-                long sum22 = 0;
-                for (int i = 0; i < 1_000_000; i++){
-                    if (i % 2 == 0){
-                        sum22 += i;
-                    }
-                }
-                System.out.println("1.Suma: " + sum22);
-                countDownLatch1.countDown();
-            }
-        });
-
-        executorServiceSinglePool.execute(new Runnable() {
-            @Override
-            public void run() {
-                long sum33 = 0;
-                for (int i = 0; i < 1_000_000; i++){
-                    if (i % 7 == 0){
-                        sum33 += i;
-                    }
-                }
-                System.out.println("2.Suma: " + sum33);
-                countDownLatch1.countDown();
-            }
-        });
-
-        executorServiceSinglePool.execute(new Runnable() {
-            @Override
-            public void run() {
-                List<Integer> qwestList = new ArrayList();
-                int r;
-                int count33 = 0;
-                for (int i = 0; i < 1000; i++){
-                    qwestList.add((int)(Math.random()*1000));
-                }
-                for( int x : qwestList){
-                    if (x % 2 == 0){
-                        count33++;
-                    }
-                }
-                System.out.println("3. Count - " + count33);
-                countDownLatch1.countDown();
-            }
-        });
-        executorServiceSinglePool.shutdown();
-        try {
-            countDownLatch1.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        long after = System.currentTimeMillis();
-        System.out.println("Time FixedPool: " + (after - before));
-        System.out.println("Finished Single Pool.");
-
-    }
-
     public static void main(String[] args) {
-        long before = System.currentTimeMillis();
-        ExecutorService executorServiceFixedPool = Executors.newFixedThreadPool(3);
-        CountDownLatch countDownLatch = new CountDownLatch(3);
-
-        executorServiceFixedPool.execute(new Runnable() {
+        ExecutorService executorService = Executors.newFixedThreadPool(3,new ThreadFactory() {
             @Override
-            public void run() {
-                long sum1 = 0;
-                for (int i = 0; i < 1000000; i++){
-                    if (i % 2 == 0){
-                        sum1 += i;
-                    }
-                }
-                System.out.println("1.Suma: " + sum1);
-                countDownLatch.countDown();
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r);
+                thread.setDaemon(true);
+                return thread;
             }
         });
 
-        executorServiceFixedPool.execute(new Runnable() {
+        executorService.execute(new Runnable() {
             @Override
             public void run() {
-                long sum = 0;
-                for (int i = 0; i < 1000000; i++){
-                    if (i % 7 == 0){
-                        sum += i;
+                try {
+                    while (true) {
+                        System.out.print("..");
+                        Thread.sleep(300);
                     }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                System.out.println("2.Suma: " + sum);
-                countDownLatch.countDown();
             }
         });
 
-        executorServiceFixedPool.execute(new Runnable() {
+        Future<String> future = executorService.submit(new Callable<String>() {
             @Override
-            public void run() {
-                List<Integer> qwestList = new ArrayList<>();
-
-                int count = 0;
-                for (int i = 0; i < 1000; i++){
-
-                    qwestList.add((int)(Math.random()*1000));
-                }
-
-                for( int x : qwestList){
-                    if (x % 2 == 0){
-                        count++;
-                    }
-                }
-                System.out.println("3. Count - " + count);
-                countDownLatch.countDown();
+            public String call() throws Exception {
+                   Thread.sleep(5000);
+                return "Nike";
             }
         });
-        executorServiceFixedPool.shutdown();
+
+        Future<Integer> futureAge = executorService.submit(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                Thread.sleep(7000);
+                return 37;
+            }
+        });
+
         try {
-            countDownLatch.await();
+            String name = future.get();
+            int age = futureAge.get();
+            System.out.println("Name: " + name + "\nAge: " + age);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
-        long after = System.currentTimeMillis();
-        System.out.println("Finished Fixed Pool.");
-        System.out.println("Time FixedPool: " + (after - before));
-       SinglePool();
 
     }
-
 }
 
 
