@@ -5,56 +5,76 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class Main {
+    private static final String A = "A";
+    private static final String B = "B";
+    private static final String C = "C";
+    private static String nextLetter = "A";
+    static Object MONITER = new Object();
 
     public static void main(String[] args) {
-        ExecutorService executorService = Executors.newFixedThreadPool(3,new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread thread = new Thread(r);
-                thread.setDaemon(true);
-                return thread;
-            }
-        });
+        new Thread(new Runnable() {
 
-        executorService.execute(new Runnable() {
             @Override
             public void run() {
-                try {
-                    while (true) {
-                        System.out.print("..");
-                        Thread.sleep(300);
+                synchronized (MONITER) {
+                    for (int i = 0; i < 5; i++) {
+                        while (!nextLetter.equals(A)) {
+                            try {
+                                MONITER.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                        System.out.print(A);
+                        nextLetter = B;
+                        MONITER.notifyAll();
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
             }
-        });
+        }).start();
 
-        Future<String> future = executorService.submit(new Callable<String>() {
+        new Thread(new Runnable() {
             @Override
-            public String call() throws Exception {
-                   Thread.sleep(5000);
-                return "Nike";
-            }
-        });
+            public void run() {
+                synchronized (MONITER) {
+                    for (int i = 0; i < 5; i++) {
+                        while (!nextLetter.equals(B)) {
+                            try {
+                                MONITER.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
 
-        Future<Integer> futureAge = executorService.submit(new Callable<Integer>() {
+                        }
+                        System.out.print(B);
+                        nextLetter = C;
+                        MONITER.notifyAll();
+                    }
+                }
+            }
+        }).start();
+
+        new Thread(new Runnable() {
             @Override
-            public Integer call() throws Exception {
-                Thread.sleep(7000);
-                return 37;
-            }
-        });
+            public void run() {
+                synchronized (MONITER) {
+                    for (int i = 0; i < 5; i++) {
+                        while (!nextLetter.equals(C)) {
+                            try {
+                                MONITER.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
 
-        try {
-            String name = future.get();
-            int age = futureAge.get();
-            System.out.println("Name: " + name + "\nAge: " + age);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+                        }
+                        System.out.print(C);
+                        nextLetter = A;
+                        MONITER.notifyAll();
+                    }
+                }
+            }
+        }).start();
 
     }
 }
